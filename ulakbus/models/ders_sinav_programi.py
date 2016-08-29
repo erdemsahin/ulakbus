@@ -6,7 +6,7 @@
 from operator import attrgetter
 
 from pyoko import Model, field, ListNode
-from ulakbus.lib.date_time_helper import GUN_DILIMI, HAFTA
+from ulakbus.lib.date_time_helper import GUN_DILIMI, HAFTA, GUN_DILIMI_DICT, HAFTA_DICT
 from ulakbus.lib.view_helpers import list_fields_accessor
 from ulakbus.models import RoomType, Okutman, Sube, Donem, Unit, Ders, Room
 from ulakbus.models.ogrenci import Donem
@@ -25,6 +25,8 @@ DERSLIK_DURUMU = [
     (2, 'Bölüme Ait'),
     (3, 'Herkese Kapalı')
 ]
+
+DERSLIK_DURUMU_DICT = dict(DERSLIK_DURUMU)
 
 
 class ZamanDilimleri(Model):
@@ -53,7 +55,7 @@ class ZamanDilimleri(Model):
         self.zaman_dilimi_suresi = int(self.bitis_saat) - int(self.baslama_saat)
 
     def __unicode__(self):
-        return '%s - %s:%s|%s:%s' % (dict(GUN_DILIMI)[int(self.gun_dilimi)], self.baslama_saat,
+        return '%s - %s:%s|%s:%s' % (GUN_DILIMI_DICT.get(self.gun_dilimi), self.baslama_saat,
                                      self.baslama_dakika, self.bitis_saat, self.bitis_dakika)
 
 
@@ -125,10 +127,10 @@ class DerslikZamanPlani(Model):
     derslik_durum = field.Integer("Durum", choices=DERSLIK_DURUMU, index=True)
 
     def __unicode__(self):
-        return '%s %s %s:%s|%s:%s %s' % (self.derslik, dict(HAFTA)[self.gun],
+        return '%s %s %s:%s|%s:%s %s' % (self.derslik, HAFTA_DICT.get(self.gun),
                                          self.baslangic_saat, self.baslangic_dakika,
                                          self.bitis_saat, self.bitis_dakika,
-                                         dict(DERSLIK_DURUMU)[int(self.derslik_durum)])
+                                         DERSLIK_DURUMU_DICT.get(self.derslik_durum))
 
     birim_adi = list_fields_accessor(attrgetter("unit.name"), "Birim")
     derslik_adi = list_fields_accessor(attrgetter("derslik.name"), "Derslik")

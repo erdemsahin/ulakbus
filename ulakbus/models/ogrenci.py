@@ -935,8 +935,8 @@ class Odeme(Model):
 
     class Meta:
         app = 'Ogrenci'
-        verbose_name = "Borç"
-        verbose_name_plural = "Borçlar"
+        verbose_name = "Ödeme"
+        verbose_name_plural = "Ödemeler"
         list_fields = ['ogrenci_adi', 'miktar', 'odeme_tarihi']
         search_fields = ['miktar', 'odeme_tarihi']
 

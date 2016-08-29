@@ -27,8 +27,10 @@ GUN_DILIMI = [
     (2, 'Öğle'),
     (3, 'Akşam')
 ]
+GUN_DILIMI_DICT = dict(GUN_DILIMI)
 
 HAFTA = HAFTA_ICI_GUNLER + HAFTA_SONU_GUNLER
+HAFTA_DICT = dict(HAFTA)
 
 GUN_LISTESI = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
 
