@@ -10,6 +10,7 @@ Bu modül Ulakbüs uygulaması için authorization ile ilişkili data modellerin
 # This file is licensed under the GNU General Public License v3
 # (GPLv3).  See LICENSE.txt for details.
 import hashlib
+from operator import attrgetter
 
 from pyoko import field
 from pyoko import Model, ListNode
@@ -17,6 +18,7 @@ from passlib.hash import pbkdf2_sha512
 from pyoko import LinkProxy
 from pyoko.conf import settings
 from pyoko.lib.utils import lazy_property
+from ulakbus.lib.view_helpers import list_fields_accessor
 
 from zengine.auth.permissions import get_all_permissions
 from zengine.dispatch.dispatcher import receiver
@@ -52,6 +54,7 @@ class User(Model, BaseUser):
         verbose_name = "Kullanıcı"
         verbose_name_plural = "Kullanıcılar"
         search_fields = ['username', 'name', 'surname']
+        list_fields = ['username', 'name', 'surname']
 
     @lazy_property
     def full_name(self):
@@ -138,6 +141,7 @@ class AbstractRole(Model):
         verbose_name = "Soyut Rol"
         verbose_name_plural = "Soyut Roller"
         search_fields = ['id', 'name']
+        list_fields = ['id', 'name']
 
     def __unicode__(self):
         return "%s" % self.name
@@ -288,7 +292,7 @@ class Role(Model):
         verbose_name = "Rol"
         verbose_name_plural = "Roller"
         search_fields = ['name']
-        list_fields = []
+        list_fields = ['name', 'user_full_name']
         crud_extra_actions = [{'name': 'İzinleri Düzenle', 'wf': 'permissions', 'show_as': 'button'}]
 
     @property
@@ -305,6 +309,8 @@ class Role(Model):
             object: user nesnesi
         """
         return self.user
+
+    user_full_name = list_fields_accessor(attrgetter("user.full_name"), "Ad Soyad")
 
     def __unicode__(self):
         return "Role %s" % self.name or (self.key if self.is_in_db() else '')
@@ -439,6 +445,8 @@ class LimitedPermissions(Model):
         app = 'Sistem'
         verbose_name = "Sınırlandırılmış Yetki"
         verbose_name_plural = "Sınırlandırılmış Yetkiler"
+        list_fields = ['time_start', 'time_end']
+        search_fields = ['time_start', 'time_end']
 
     def __unicode__(self):
         return "%s - %s" % (self.time_start, self.time_end)

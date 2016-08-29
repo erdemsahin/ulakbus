@@ -3,10 +3,13 @@
 #
 # This file is licensed under the GNU General Public License v3
 # (GPLv3).  See LICENSE.txt for details.
+from operator import attrgetter
 
 from pyoko import Model, field, ListNode
 from ulakbus.lib.date_time_helper import GUN_DILIMI, HAFTA
+from ulakbus.lib.view_helpers import list_fields_accessor
 from ulakbus.models import RoomType, Okutman, Sube, Donem, Unit, Ders, Room
+from ulakbus.models.ogrenci import Donem
 from zengine.forms import fields
 from .buildings_rooms import Room
 from .auth import Unit
@@ -27,7 +30,9 @@ DERSLIK_DURUMU = [
 class ZamanDilimleri(Model):
     class Meta:
         unique_together = [('birim', 'gun_dilimi')]
-        search_fields = ['birim', 'gun_dilimi']
+        search_fields = ['gun_dilimi']
+        verbose_name_plural = "Zaman Dilimleri"
+        list_fields = ['gun_dilimi', 'baslama_saat', 'baslama_dakika', 'bitis_saat', 'bitis_dakika']
 
     birim = Unit('Bölüm')
     gun_dilimi = field.Integer('Gün Dilimi', choices=GUN_DILIMI, index=True)
@@ -61,11 +66,14 @@ class OgElemaniZamanPlani(Model):
         verbose_name = 'Öğretim Elemanı Zaman Kaydı'
         verbose_name_plural = 'Öğretim Elemanı Zaman Kayıtları'
         unique_together = [('okutman', 'birim')]
-        search_fields = ['okutman', 'birim']
+        list_fields = ['okutman_adi', 'birim_adi', 'toplam_ders_saati']
 
     okutman = Okutman("Öğretim Elemanı")
     birim = Unit("Birim")
     toplam_ders_saati = field.Integer("Öğretim Elemanı Toplam Ders Saati", index=True)
+
+    okutman_adi = list_fields_accessor(attrgetter("okutman"), "Okutman")
+    birim_adi = list_fields_accessor(attrgetter("birim.name"), "Birim")
 
     def __unicode__(self):
         return '%s - %s' % (self.birim, self.okutman)
@@ -79,14 +87,19 @@ class ZamanCetveli(Model):
 
     class Meta:
         verbose_name = 'Zaman Cetveli'
+        verbose_name_plural = "Zaman Cetvelleri"
         unique_together = [('zaman_dilimi', 'ogretim_elemani_zaman_plani', 'gun')]
-        search_fields = ['zaman_dilimi', 'ogretim_elemani_zaman_plani', 'birim', 'gun', 'durum']
+        search_fields = ['gun', 'durum']
+        list_fields = ['_zaman_dilimi', '_ogretim_elemani_zaman_plani', 'gun', 'durum']
 
     birim = Unit("Birim")
     gun = field.Integer("Gün", choices=HAFTA, index=True)
     zaman_dilimi = ZamanDilimleri("Zaman Dilimi")
     durum = field.Integer("Uygunluk Durumu", choices=UYGUNLUK_DURUMU, default=1, index=True)
     ogretim_elemani_zaman_plani = OgElemaniZamanPlani("Öğretim Elemanı")
+
+    _zaman_dilimi = list_fields_accessor(attrgetter("zaman_dilimi"), "Zaman Aralığı")
+    _ogretim_elemani_zaman_plani = list_fields_accessor(attrgetter("ogretim_elemani_zaman_plani"), "Öğretim Elemanı Zaman Planı")
 
     def __unicode__(self):
         return '%s - %s - %s' % (self.ogretim_elemani_zaman_plani, self.zaman_dilimi,
@@ -96,9 +109,11 @@ class ZamanCetveli(Model):
 class DerslikZamanPlani(Model):
     class Meta:
         verbose_name = 'Derslik Zaman Planı'
+        verbose_name_plural = "Derslik Zaman Planları"
         unique_together = [
             ('derslik', 'gun', 'baslangic_saat', 'baslangic_dakika', 'bitis_saat', 'bitis_dakika')]
-        search_fields = ['unit', 'derslik', 'gun', 'derslik_durum']
+        search_fields = ['gun', 'derslik_durum']
+        list_fields = ['birim_adi', 'derslik_adi', 'gun', 'baslangic_saati', "bitis_saati", 'derslik_durum']
 
     unit = Unit()
     derslik = Room()
@@ -115,11 +130,18 @@ class DerslikZamanPlani(Model):
                                          self.bitis_saat, self.bitis_dakika,
                                          dict(DERSLIK_DURUMU)[int(self.derslik_durum)])
 
+    birim_adi = list_fields_accessor(attrgetter("unit.name"), "Birim")
+    derslik_adi = list_fields_accessor(attrgetter("derslik.name"), "Derslik")
+    baslangic_saati = list_fields_accessor(lambda obj: "%s:%s" % (obj.baslangic_saat, obj.baslangic_dakika), "Başlangıç Saati")
+    bitis_saati = list_fields_accessor(lambda obj: "%s:%s" % (obj.bitis_saat, obj.bitis_dakika), "Bitiş Saati")
+
 
 class DersEtkinligi(Model):
     class Meta:
         verbose_name = "Ders Etkinliği"
-        search_fields = ['unit_yoksis_no', 'room', 'okutman']
+        verbose_name_plural = "Ders Etkinlikleri"
+        search_fields = ['unit_yoksis_no']
+        list_fields = ["okutman_adi", "ders_adi", "birim_adi", "sube_adi", "baslangic_saati", "bitis_saati"]
 
     solved = fields.Boolean('Ders Planı Çözüm Durumu', index=True)
     unitime_key = fields.String(index=True)  # class id
@@ -157,12 +179,20 @@ class DersEtkinligi(Model):
         return '%s - %s - %s:%s|%s:%s - %s' % (
             self.room.name, self.gun, self.baslangic_saat, self.baslangic_dakika,
             self.bitis_saat, self.bitis_dakika, self.okutman)
+    okutman_adi = list_fields_accessor(attrgetter("okutman"), "Okutman")
+    birim_adi = list_fields_accessor(attrgetter("bolum.name"), "Birim")
+    sube_adi = list_fields_accessor(attrgetter("sube.ad"), "Şube")
+    ders_adi = list_fields_accessor(attrgetter("sube.ders.ad"), "Ders")
+    baslangic_saati = list_fields_accessor(lambda obj: "%s:%s" % (obj.baslangic_saat, obj.baslangic_dakika), "Başlangıç Saati")
+    bitis_saati = list_fields_accessor(lambda obj: "%s:%s" % (obj.bitis_saat, obj.bitis_dakika), "Bitiş Saati")
 
 
 class SinavEtkinligi(Model):
     class Meta:
         verbose_name = 'Sınav Etkinliği'
-        search_field = ['bolum', 'ders', 'sube', 'donem']
+        verbose_name_plural = "Sınav Etkinlikleri"
+        search_fields = ['tarih', 'ders_adi', 'sube_adi']
+        list_fields = ['birim_adi', 'ders_adi', 'sube_adi', 'donem_adi', 'tarih']
 
     sube = Sube('Şube', index=True)
     ders = Ders('Ders', index=True)
@@ -198,3 +228,7 @@ class SinavEtkinligi(Model):
 
     def sinav_zamani(self):
         return '{:%Y.%m.%d - %H:%M}'.format(self.tarih) if self.tarih else 'Henüz zamanlanmadi'
+    donem_adi = list_fields_accessor(attrgetter("donem"), "Dönem")
+    birim_adi = list_fields_accessor(attrgetter("bolum.name"), "Birim")
+    sube_adi = list_fields_accessor(attrgetter("sube.ad"), "Şube")
+    ders_adi = list_fields_accessor(attrgetter("sube.ders.ad"), "Ders")

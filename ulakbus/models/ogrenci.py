@@ -10,16 +10,18 @@ Bu modül Ulakbüs uygulaması için öğrenci modeli ve öğrenciyle ilişkili 
 
 """
 from datetime import date
+from operator import attrgetter
 
 import six
 
 from pyoko import Model, field, ListNode, LinkProxy
 from pyoko.exceptions import ObjectDoesNotExist
 from pyoko.lib.utils import lazy_property
+from ulakbus.lib.view_helpers import list_fields_accessor
 from ulakbus.models.personel import Izin
 from .auth import Role, User
 from .auth import Unit
-from .buildings_rooms import Room, RoomType
+from .buildings_rooms import RoomType
 from .personel import Personel
 
 
@@ -31,12 +33,19 @@ class OgretimYili(Model):
     yil = field.Integer("Yıl", unique=True)  # 2015
     ad = field.String("Öğretim Yılı")  # 2015 - 2016 Öğretim Yılı
 
+    class Meta:
+        app = "Ogrenci"
+        verbose_name = "Öğretim Yılı"
+        verbose_name_plural = "Öğretim Yılları"
+        list_fields = ['yil', 'ad']
+        search_fields = ['yil', 'ad']
+
     def post_creation(self):
         self.ad = "%s - %s Öğretim Yılı" % (self.yil, int(self.yil) + 1)
         self.save()
 
     def __unicode__(self):
-        return self.ad
+        return "%s" % self.ad
 
 
 class Donem(Model):
@@ -71,7 +80,7 @@ class Donem(Model):
         app = 'Ogrenci'
         verbose_name = "Dönem"
         verbose_name_plural = "Dönemler"
-        list_fields = ['ad', 'baslangic_tarihi']
+        list_fields = ['ad', 'baslangic_tarihi', 'bitis_tarihi']
         search_fields = ['ad']
 
     def __unicode__(self):
@@ -141,7 +150,7 @@ class Donem(Model):
         Args:
             yil (int): takvim yili
             ay (int): takvim ayi
-            takvim (tuple): ayın ilk günününö haftanın hangi gününe
+            takvim (tuple): ayın ilk gününe haftanın hangi gününe
             denk geldiği ve ayin kac gün sürdüğü integerlarından oluşan tuple. e.g (4, 29)
 
         Returns:
@@ -229,6 +238,7 @@ class HariciOkutman(Model):
         verbose_name = "Harici Okutman"
         verbose_name_plural = "Harici Okutmanlar"
         search_fields = ['unvan', 'ad', 'soyad']
+        list_fields = ['unvan', 'ad', 'soyad']
 
     def __unicode__(self):
         return '%s %s' % (self.ad, self.soyad)
@@ -277,7 +287,8 @@ class Okutman(Model):
         app = 'Ogrenci'
         verbose_name = "Okutman"
         verbose_name_plural = "Okutmanlar"
-        search_fields = ['unvan', 'personel', 'ad', 'soyad', 'birim_no']
+        list_fields = ['unvan', 'ad', 'soyad', 'birim_no']
+        search_fields = ['unvan', 'ad', 'soyad', 'birim_no']
 
     @lazy_property
     def okutman(self):
@@ -368,10 +379,6 @@ class Program(Model):
     birim = Unit(reverse_name="yoksis_program_program", verbose_name="YÖKSİS Program")
 
     bolum = Unit(reverse_name="bolum_program", verbose_name="Bölüm")
-
-    # todo: to be removed
-    # class Donemler(ListNode):
-    #     donem = Donem()
 
     class Meta:
         app = 'Ogrenci'
@@ -466,12 +473,8 @@ class Ders(Model):
         sube.donem = Donem.guncel_donem()
         sube.save()
 
-    def pre_save(self):
-        self.just_created = not self.exist
-
-    def post_save(self):
-        if self.just_created:
-            self.ontanimli_sube_olustur()
+    def post_creation(self):
+        self.ontanimli_sube_olustur()
 
 
 class Sube(Model):
@@ -522,7 +525,7 @@ class Sube(Model):
         app = 'Ogrenci'
         verbose_name = "Şube"
         verbose_name_plural = "Şubeler"
-        list_fields = ['ad', 'kontenjan']
+        list_fields = ['ad', 'kontenjan', 'dis_kontenjan']
         search_fields = ['ad', 'kontenjan']
 
     def sube_sinavlarini_olustur(self):
@@ -570,34 +573,15 @@ class Sinav(Model):
         app = 'Ogrenci'
         verbose_name = "Sınav"
         verbose_name_plural = "Sınavlar"
-        list_fields = ['tarih', 'yapilacagi_yer']
-        search_fields = ['aciklama', 'tarih']
+        list_fields = ['sube_adi', 'tarih', 'yapilacagi_yer', 'ders_adi']
+        search_fields = ['aciklama', 'tarih', 'sube_adi', 'ders_adi']
 
     def __unicode__(self):
         return '%s %s %s' % (self.get_tur_display(), self.ders, self.sube)
 
+    sube_adi = list_fields_accessor(attrgetter("sube.ad"), "Şube Adı")
 
-class DersProgrami(Model):
-    """Ders Programı Modeli
-
-    Dersin işlenecegi gün, saat, şube ve derslik bilgilerini saklayan modeldir.
-
-    """
-
-    gun = field.String("Ders Günü", index=True)
-    saat = field.Integer("Ders Saati", index=True)
-    sube = Sube()
-    derslik = Room()
-
-    class Meta:
-        app = 'Ogrenci'
-        verbose_name = "Ders Programı"
-        verbose_name_plural = "Ders Programları"
-        list_fields = ['gun', 'saat']
-        search_fields = ['gun', 'saat']
-
-    def __unicode__(self):
-        return '%s %s' % (self.gun, self.saat)
+    ders_adi = list_fields_accessor(attrgetter("sube.ders.ad"), "Ders Adı")
 
 
 class Ogrenci(Model):
@@ -702,8 +686,10 @@ class OncekiEgitimBilgisi(Model):
         app = 'Ogrenci'
         verbose_name = "Önceki Eğitim Bilgisi"
         verbose_name_plural = "Önceki Eğitim Bilgileri"
-        list_fields = ['okul_adi', 'diploma_notu', 'mezuniyet_yili']
-        search_fields = ['okul_adi', 'diploma_notu', 'mezuniyet_yili']
+        list_fields = ['ogrenci_adi', 'okul_adi', 'diploma_notu', 'mezuniyet_yili']
+        search_fields = ['ogrenci_adi', 'okul_adi', 'diploma_notu', 'mezuniyet_yili']
+
+    ogrenci_adi = list_fields_accessor(attrgetter("ogrenci"), "Ad Soyad")
 
     def __unicode__(self):
         return '%s %s %s' % (self.okul_adi, self.mezuniyet_yili, self.ogrenci.ad)
@@ -740,7 +726,6 @@ class OgrenciProgram(Model):
     ayrilma_nedeni = field.Integer('Ayrılma Nedeni', index=True, choices='ayrilma_nedeni')
     basari_durumu = field.String("Başarı Durumu", index=True)
     diploma_no = field.String("Diploma No", index=True)
-    ders_programi = DersProgrami()
     danisman = Personel()
     program = Program()
     ogrenci = Ogrenci()
@@ -750,6 +735,8 @@ class OgrenciProgram(Model):
         app = 'Ogrenci'
         verbose_name = "Öğrenci Programı"
         verbose_name_plural = "Öğrenci Programları"
+        list_fields = ['ogrenci_adi', 'ogrenci_no', 'giris_tarihi']
+        search_fields = ['ogrenci_no']
 
     class Belgeler(ListNode):
         tip = field.Integer("Belge Tipi", choices="belge_tip", index=True)
@@ -769,6 +756,8 @@ class OgrenciProgram(Model):
             r.append((ogd.donem.ad, ogd.donem.baslangic_tarihi))
         r.sort(key=lambda tup: tup[1])
         return r
+
+    ogrenci_adi = list_fields_accessor(attrgetter('ogrenci'), 'Ad Soyad')
 
 
 class OgrenciDersi(Model):
@@ -800,8 +789,8 @@ class OgrenciDersi(Model):
         app = 'Ogrenci'
         verbose_name = "Ögrenci Dersi"
         verbose_name_plural = "Öğrenci Dersleri"
-        list_fields = ['ders', 'alis_bicimi']
-        search_fields = ['alis_bicimi', ]
+        list_fields = ['ogrenci_adi', 'ogrenci_no', 'ders_adi']
+        search_fields = ['ogrenci_no', ]
         unique_together = [('ogrenci', 'sube')]
 
     def post_creation(self):
@@ -827,6 +816,10 @@ class OgrenciDersi(Model):
         return six.text_type(self.ders.ad)
 
     ders_adi.title = 'Ders'
+
+    ogrenci_adi = list_fields_accessor(attrgetter("ogrenci"), "Ad Soyad")
+
+    ogrenci_no = list_fields_accessor(attrgetter("ogrenci_program.ogrenci_no"), "Öğrenci No")
 
     def __unicode__(self):
         return '%s %s %s' % (self.ders.kod, self.ders.ad, self.alis_bicimi)
@@ -855,25 +848,16 @@ class DersKatilimi(Model):
     class Meta:
         app = 'Ogrenci'
         verbose_name = "Ders Devamsızlığı"
-        verbose_name_plural = "Ders Devamsızlıklari"
-        list_fields = ['katilim_durumu', 'sube_dersi']
+        verbose_name_plural = "Ders Devamsızlıkları"
+        list_fields = ['ogrenci_adi', 'katilim_durumu', 'sube_dersi']
         search_fields = ['sube_dersi', 'katilim_durumu']
 
-    def sube_dersi(self):
-        """
-        Şubenin bağlı olduğu ders adı.
-
-        Returns:
-            Şubenin bağlı olduğu ders örneğinin adını döndürür.
-
-        """
-
-        return six.text_type(self.sube.ders)
-
-    sube_dersi.title = 'Ders'
+    sube_dersi = list_fields_accessor(attrgetter("sube.ders"), "Ders")
 
     def __unicode__(self):
         return '%s %s' % (self.katilim_durumu, self.ogrenci)
+
+    ogrenci_adi = list_fields_accessor(attrgetter("ogrenci"), "Ad Soyad")
 
 
 class Borc(Model):
@@ -901,11 +885,13 @@ class Borc(Model):
         app = 'Ogrenci'
         verbose_name = "Borç"
         verbose_name_plural = "Borçlar"
-        list_fields = ['miktar', 'son_odeme_tarihi']
+        list_fields = ['ogrenci_adi', 'miktar', 'son_odeme_tarihi']
         search_fields = ['miktar', 'odeme_tarihi']
 
     def __unicode__(self):
         return '%s %s %s %s' % (self.miktar, self.para_birimi, self.sebep, self.son_odeme_tarihi)
+
+    ogrenci_adi = list_fields_accessor(attrgetter("ogrenci"), "Ad Soyad")
 
 
 class Banka(Model):
@@ -949,13 +935,15 @@ class Odeme(Model):
 
     class Meta:
         app = 'Ogrenci'
-        verbose_name = "Borc"
-        verbose_name_plural = "Borclar"
-        list_fields = ['miktar', 'son_odeme_tarihi']
+        verbose_name = "Borç"
+        verbose_name_plural = "Borçlar"
+        list_fields = ['ogrenci_adi', 'miktar', 'odeme_tarihi']
         search_fields = ['miktar', 'odeme_tarihi']
 
     def __unicode__(self):
         return '%s %s %s %s' % (self.miktar, self.para_birimi, self.sebep, self.son_odeme_tarihi)
+
+    ogrenci_adi = list_fields_accessor(attrgetter("ogrenci"), "Ad Soyad")
 
 
 class BankaAuth(Model):
@@ -971,8 +959,8 @@ class BankaAuth(Model):
     banka = Banka()
 
     class Meta:
-        verbose_name = "Banka Kullanicisi"
-        verbose_name_plural = "Banka Kullanicilari"
+        verbose_name = "Banka Kullanıcısı"
+        verbose_name_plural = "Banka Kullanıcıları"
 
     def __unicode__(self):
         return '%s %s' % (self.username, self.banka.ad)
@@ -1010,19 +998,17 @@ class DegerlendirmeNot(Model):
         app = 'Ogrenci'
         verbose_name = "Not"
         verbose_name_plural = "Notlar"
-        list_fields = ['puan', 'ders_adi']
+        list_fields = ['puan', 'ders_adi', 'ogrenci_adi']
         search_fields = ['aciklama', 'puan', 'ogrenci_no']
-        list_filters = ['donem', ]
+        list_filters = ['donem', 'yil', 'puan', 'ogrenci_no']
 
     def post_save(self):
         self.sinav.degerlendirme = True
         self.sinav.puan = self.puan
         self.sinav.save()
 
-    def ders_adi(self):
-        return "%s" % self.ders.ad
-
-    ders_adi.title = "Ders"
+    ders_adi = list_fields_accessor(attrgetter("ders.ad"), "Ders")
+    ogrenci_adi = list_fields_accessor(attrgetter("ogrenci"), "Ad Soyad")
 
     def __unicode__(self):
         return '%s %s' % (self.puan, self.sinav)
@@ -1117,20 +1103,18 @@ class AkademikTakvim(Model):
     """
 
     birim = Unit("Birim", index=True)
-    # yil = field.Date("Yıl", index=True)
     ogretim_yili = OgretimYili("Öğretim Yılı", index=True)
 
     class Meta:
         app = 'Ogrenci'
         verbose_name = "Akademik Takvim"
         verbose_name_plural = "Akademik Takvimler"
-        list_fields = ['_birim', 'ogretim_yili']
-        # search_fields = ['yil']
+        list_fields = ['_birim', 'yil']
+        search_fields = ['_birim', 'yil']
 
-    def _birim(self):
-        return "%s" % self.birim
+    _birim = list_fields_accessor(attrgetter("birim.name"), "Birim")
 
-    _birim.title = 'Birim'
+    yil = list_fields_accessor(attrgetter("ogretim_yili.yil"), "Öğretim Yılı")
 
     def __unicode__(self):
         return '%s %s' % (self.birim, self.ogretim_yili.ad)
@@ -1168,12 +1152,14 @@ class Takvim(Model):
 
     def pre_save(self):
         if not self.baslangic and not self.bitis:
-            raise Exception("Tarihlerden en az bir tanesi dolu olmalidir.")
+            raise Exception("Tarihlerden en az bir tanesi dolu olmalıdır.")
 
     class Meta:
         app = 'Ogrenci'
         verbose_name = "Takvim"
         verbose_name_plural = "Takvimler"
+        list_fields = ['baslangic', 'bitis', 'etkinlik']
+        search_fields = ['baslangic', 'bitis', 'etkinlik']
 
     def __unicode__(self):
         return '%s %s %s' % (
@@ -1219,11 +1205,17 @@ class DonemDanisman(Model):
         app = 'Ogrenci'
         verbose_name = "Dönem Danışman"
         verbose_name_plural = "Dönem Danışmanları"
-        list_fields = ['program', 'okutman', 'bolum', 'donem']
+        list_fields = ['okutman_adi', '_bolum', '_donem']
         search_fields = ['aciklama']
 
     def __unicode__(self):
         return '%s %s' % (self.bolum, self.okutman)
+
+    okutman_adi = list_fields_accessor(attrgetter("okutman"), "Ad Soyad")
+
+    _donem = list_fields_accessor(attrgetter("donem"), "Dönem")
+
+    _bolum = list_fields_accessor(attrgetter("bolum"), "Bölüm")
 
 
 class DondurulmusKayit(Model):
@@ -1242,8 +1234,12 @@ class DondurulmusKayit(Model):
         app = 'Ogrenci'
         verbose_name = "Dondurulmuş Kayıt"
         verbose_name_plural = "Dondurulmuş Kayıtlar"
-        list_fields = ['ogrenci_program', 'baslangic_tarihi', 'aciklama', 'donem']
+        list_fields = ['_ogrenci_program', 'baslangic_tarihi', 'aciklama', '_donem']
         search_fields = ['aciklama', 'baslangic_tarihi']
 
     def __unicode__(self):
         return '%s %s' % (self.ogrenci_program, self.donem)
+
+    _donem = list_fields_accessor(attrgetter("donem"), "Dönem")
+
+    _ogrenci_program = list_fields_accessor(attrgetter("ogrenci_program"), "Program")

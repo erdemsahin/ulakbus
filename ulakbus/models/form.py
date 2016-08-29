@@ -9,6 +9,9 @@ Bu modül `Form` modeli ve bu modelle ilintili data modellerini içerir.
 #
 # This file is licensed under the GNU General Public License v3
 # (GPLv3).  See LICENSE.txt for details.
+from operator import attrgetter
+
+from ulakbus.lib.view_helpers import list_fields_accessor
 
 __author__ = 'H.İbrahim Yılmaz (drlinux)'
 
@@ -34,7 +37,7 @@ class Form(Model):
         verbose_name = "Form"
         verbose_name_plural = "Formlar"
         list_fields = ['ad', 'date']
-        search_fields = ['ad', 'file']
+        search_fields = ['ad', 'date']
 
     def __unicode__(self):
         return '%s %s' % (self.ad, self.date)
@@ -57,8 +60,11 @@ class FormData(Model):
         app = 'Form'
         verbose_name = "Form Data"
         verbose_name_plural = "Form Data"
-        list_fields = ['form', 'data', 'date']
-        search_fields = ['data', 'date', 'user']
+        list_fields = ['user_full_name', 'form_adi', 'data', 'date']
+        search_fields = ['data', 'date']
+
+    form_adi = list_fields_accessor(attrgetter("form.ad"), "Form Adı")
+    user_full_name = list_fields_accessor(attrgetter("user.full_name"), "Ad Soyad")
 
     def _form(self):
         return "%s" % self.form

@@ -8,6 +8,9 @@
 Bu modül Ulakbüs uygulaması için personel modelini ve  personel ile ilişkili modelleri içerir.
 
 """
+from operator import attrgetter
+
+from ulakbus.lib.view_helpers import list_fields_accessor
 from .hitap.hitap_sebep import HitapSebep
 from pyoko.lib.utils import lazy_property
 
@@ -218,9 +221,14 @@ class AdresBilgileri(Model):
     class Meta:
         verbose_name = "Adres Bilgisi"
         verbose_name_plural = "Adres Bilgileri"
+        search_fields = ['il', 'ilce', 'adres', 'personel_tckn']
+        list_fields = ["il", "ilce", "adres", "personel_adi", "personel_tckn"]
 
     def __unicode__(self):
         return "%s %s" % (self.ad, self.il)
+
+    personel_adi = list_fields_accessor(attrgetter("personel"), "Ad Soyad")
+    personel_tckn = list_fields_accessor(attrgetter("personel.tckn"), "TC No")
 
 
 class KurumIciGorevlendirmeBilgileri(Model):
@@ -255,6 +263,8 @@ class KurumIciGorevlendirmeBilgileri(Model):
 
         verbose_name = "Kurum İçi Görevlendirme"
         verbose_name_plural = "Kurum İçi Görevlendirmeler"
+        search_fields = ["personel_tckn"]
+        list_fields = ["gorev_tipi", "kurum_ici_gorev_baslama_tarihi", "kurum_ici_gorev_bitis_tarihi", "birim_adi"]
         form_grouping = [
             {
                 "layout": "4",
@@ -285,6 +295,9 @@ class KurumIciGorevlendirmeBilgileri(Model):
     def __unicode__(self):
         return "%s %s" % (self.gorev_tipi, self.aciklama)
 
+    birim_adi = list_fields_accessor(attrgetter("birim.name"), "Birim")
+    personel_tckn = list_fields_accessor(attrgetter("personel.tckn"), "TC No")
+
 
 class KurumDisiGorevlendirmeBilgileri(Model):
     """Kurum Dışı Görevlendirme Bilgileri Modeli
@@ -308,9 +321,9 @@ class KurumDisiGorevlendirmeBilgileri(Model):
     class Meta:
         verbose_name = "Kurum Dışı Görevlendirme"
         verbose_name_plural = "Kurum Dışı Görevlendirmeler"
-        list_fields = ["ulke", "gorev_tipi", "kurum_disi_gorev_baslama_tarihi"]
+        list_fields = ["personel_adi", "ulke", "gorev_tipi", "kurum_disi_gorev_baslama_tarihi", "kurum_disi_gorev_bitis_tarihi"]
         list_filters = ["ulke", "gorev_tipi", "kurum_disi_gorev_baslama_tarihi"]
-        search_fields = ["aciklama", ]
+        search_fields = ["aciklama", "personel_tckn"]
         form_grouping = [
             {
                 "layout": "4",
@@ -346,6 +359,9 @@ class KurumDisiGorevlendirmeBilgileri(Model):
     def __unicode__(self):
         return "%s %s %s" % (self.gorev_tipi, self.aciklama, self.ulke)
 
+    personel_adi = list_fields_accessor(attrgetter("personel"), "Ad Soyad")
+    personel_tckn = list_fields_accessor(attrgetter("personel.tckn"), "TC No")
+
 
 class Kadro(Model):
     """Kadro Modeli
@@ -376,12 +392,14 @@ class Kadro(Model):
         app = 'Personel'
         verbose_name = "Kadro"
         verbose_name_plural = "Kadrolar"
-        list_fields = ['durum', 'unvan', 'aciklama']
+        list_fields = ["birim_adi", 'durum', 'unvan', 'aciklama']
         search_fields = ['unvan', 'derece']
         list_filters = ['durum']
 
     def __unicode__(self):
         return "%s - %s %s. derece" % (self.kadro_no, self.get_unvan_display(), self.derece)
+
+    birim_adi = list_fields_accessor(attrgetter("birim.name"), "Birim")
 
 
 class Izin(Model):
@@ -404,8 +422,8 @@ class Izin(Model):
         app = 'Personel'
         verbose_name = "İzin"
         verbose_name_plural = "İzinler"
-        list_fields = ['tip', 'baslangic', 'bitis', 'onay', 'telefon']
-        search_fields = ['tip', 'baslangic', 'onay']
+        list_fields = ['personel_adi', 'personel_tckn', 'tip', 'baslangic', 'bitis', 'onay', 'telefon']
+        search_fields = ['personel_tckn', 'tip', 'baslangic', 'onay']
 
     def __unicode__(self):
         return '%s %s' % (self.tip, self.onay)
@@ -459,6 +477,9 @@ class Izin(Model):
         for n in range(int((bitis - baslangic).days) + 1):
             yield baslangic + timedelta(n)
 
+    personel_adi = list_fields_accessor(attrgetter("personel"), "Ad Soyad")
+    personel_tckn = list_fields_accessor(attrgetter("personel.tckn"), "TC No")
+
 
 class UcretsizIzin(Model):
     """Ücretsiz izin Modeli
@@ -479,11 +500,14 @@ class UcretsizIzin(Model):
         app = 'Personel'
         verbose_name = "Ücretsiz İzin"
         verbose_name_plural = "Ücretsiz İzinler"
-        list_fields = ['tip', 'baslangic_tarihi', 'bitis_tarihi', 'donus_tarihi']
-        search_fields = ['tip', 'onay_tarihi']
+        list_fields = ['personel_tckn', 'personel_adi', 'tip', 'baslangic_tarihi', 'bitis_tarihi', 'donus_tarihi']
+        search_fields = ['personel_tckn', 'tip', 'onay_tarihi']
 
     def __unicode__(self):
         return '%s %s' % (self.tip, self.onay_tarihi)
+
+    personel_adi = list_fields_accessor(attrgetter("personel"), "Ad Soyad")
+    personel_tckn = list_fields_accessor(attrgetter("personel.tckn"), "TC No")
 
 
 class Atama(Model):
@@ -509,9 +533,9 @@ class Atama(Model):
         app = 'Personel'
         verbose_name = "Atama"
         verbose_name_plural = "Atamalar"
-        list_fields = ['hizmet_sinif', 'gorev_suresi_baslama', 'ibraz_tarihi',
+        list_fields = ['personel_tckn', 'personel_adi', 'hizmet_sinifi', 'goreve_baslama_tarihi', 'ibraz_tarihi',
                        'durum']
-        search_fields = ['hizmet_sinif', 'statu']
+        search_fields = ['personel_tckn', 'hizmet_sinif', 'statu']
 
     def __unicode__(self):
         return '%s %s %s' % (self.personel.kurum_sicil_no,
@@ -566,3 +590,6 @@ class Atama(Model):
         # personelin kadro derecesi 0 olacak
         self.personel.kadro_derece = 0
         self.personel.save()
+
+    personel_adi = list_fields_accessor(attrgetter("personel"), "Ad Soyad")
+    personel_tckn = list_fields_accessor(attrgetter("personel.tckn"), "TC No")

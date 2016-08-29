@@ -7,6 +7,8 @@
 #
 # This file is licensed under the GNU General Public License v3
 # (GPLv3).  See LICENSE.txt for details.
+from operator import attrgetter
+
 
 def prepare_choices_for_model(model, **kwargs):
     """Model için Seçenekler Hazırla
@@ -37,3 +39,16 @@ def convert_model_object_titlemap_item(m):
 
     """
     return {"name": m.__unicode__(), "value": m.key}
+
+
+def list_fields_accessor(func, title):
+    """
+    Bir modele bağlı başka modellerin attributelerini list_fields ve search fields
+    içinde kullanılmasına izine veren fonskiyondur.
+
+    """
+    def list_fields_helper(obj):
+        return str(func(obj))
+
+    list_fields_helper.title = title
+    return list_fields_helper
