@@ -13,7 +13,7 @@ from zengine.views.crud import CrudView
 from collections import OrderedDict
 from ulakbus.services.zato_wrapper import DersProgramiOlustur
 from ulakbus.services.zato_wrapper import SinavProgramiOlustur
-from ulakbus.models import Room, Okutman, DersEtkinligi, Donem, DerslikZamanPlani, SinavEtkinligi, Sube
+from ulakbus.models import Room, Okutman, DersEtkinligi, Donem, SinavEtkinligi, Sube
 from zengine.lib.translation import gettext_lazy as __, gettext as _, format_time, format_datetime
 from datetime import time
 
@@ -22,22 +22,33 @@ ARAMA_TURU = [
     (2, 'Öğretim Elemanı')
 ]
 
-MESSAGE = {"kayit_var": {"type": 'info',
-                         "title": __(u'Yayınlanmış Program Var!'),
-                         "msg": __(u'Yayınlanan programınız bulunmaktadır. Tekrardan program oluşturamazsınız.')},
-           "hatasiz_sonuc": {"type": 'info',
-                             "title": __(u'Yayınlanmamış Program Var!'),
-                             "msg": __(u'Yayınlanmayan programınızı inceleyip yayınlayabilirsiniz.')},
-           "hatali_sonuc": {"type": 'warning',
-                            "title": __(u'Hatalı Sonuçlar Var!'),
-                            "msg": __(u'Oluşturulan programda hatalı sonuçlar bulunmaktadır. Lütfen tekrardan'
-                                      u'verileri düzenleyip çalıştırınız.')},
-           "basarili": {"type": 'info',
-                        "title": __(u'Program Başarıyla Oluşturuldu!'),
-                        "msg": __(u'Yayınlanmayan programınızı inceleyip yayınlayabilirsiniz.')},
-           "yayinlandi": {"type": 'info',
-                          "title": __(u'Program Yayınlandı!'),
-                          "msg": __(u'Oluşturulan Program Başarıyla Yayınlandı')}}
+MESSAGE = {
+    "kayit_var": {
+        "type": 'info',
+        "title": __(u'Yayınlanmış Program Var!'),
+        "msg": __(u'Yayınlanan programınız bulunmaktadır. Tekrardan program oluşturamazsınız.')},
+
+    "hatasiz_sonuc": {
+        "type": 'info',
+        "title": __(u'Yayınlanmamış Program Var!'),
+        "msg": __(u'Yayınlanmayan programınızı inceleyip yayınlayabilirsiniz.')},
+
+    "hatali_sonuc": {
+        "type": 'warning',
+        "title": __(u'Hatalı Sonuçlar Var!'),
+        "msg": __(
+            u'Hesaplanan programda hatalı sonuçlar bulunmaktadır.'
+            u'Lütfen verileri gözden geçitip yeninden çalıştırınız.')},
+
+    "basarili": {
+        "type": 'info',
+        "title": __(u'Program Başarıyla Oluşturuldu!'),
+        "msg": __(u'Yayınlanmayan programınızı inceleyip yayınlayabilirsiniz.')},
+
+    "yayinlandi": {
+        "type": 'info',
+        "title": __(u'Program Yayınlandı!'),
+        "msg": __(u'Oluşturulan Program Başarıyla Yayınlandı')}}
 
 
 class AramaForm(JsonForm):
@@ -51,7 +62,6 @@ class AramaForm(JsonForm):
 
 
 class ProgramOlustur(CrudView):
-
     def calculate(self, obj):
         """
 
@@ -63,7 +73,8 @@ class ProgramOlustur(CrudView):
                  published_count >> yayınlanan model sayısı
 
         """
-        model_object = obj.objects.filter(bolum=self.current.role.unit, donem=Donem.guncel_donem(self.current))
+        model_object = obj.objects.filter(bolum=self.current.role.unit,
+                                          donem=Donem.guncel_donem(self.current))
 
         solved_count = model_object.filter(solved=True).count()
 
@@ -215,12 +226,14 @@ class ProgramOlustur(CrudView):
             datas = [ok for ok in Okutman.objects.search_on('ad', 'soyad',
                                                             startswith=text.split()[0],
                                                             endswith=text.split()[-1],
-                                                            unit=self.current.role.unit) if ok.ders_etkinligi_set]
+                                                            unit=self.current.role.unit) if
+                     ok.ders_etkinligi_set]
         else:
             derslik = True
             self.output['objects'] = [[_(u'Code'), _(u'Name')]]
             datas = [r for r in Room.objects.search_on('code', contains=text,
-                                                       unit=self.current.role.unit) if r.ders_etkinligi_set]
+                                                       unit=self.current.role.unit) if
+                     r.ders_etkinligi_set]
         for data in datas:
             data_list = OrderedDict({})
             if not derslik:
@@ -253,7 +266,8 @@ class ProgramOlustur(CrudView):
             data_etkinlik = DersEtkinligi.objects.filter(okutman_id=obj_key)
             obj = Okutman.objects.get(obj_key)
 
-        days = [_(u"Pazartesi"), _(u"Salı"), _(u"Çarşamba"), _(u"Perşembe"), _(u"Cuma"), _(u"Cumartesi"), _(u"Pazar")]
+        days = [_(u"Pazartesi"), _(u"Salı"), _(u"Çarşamba"),
+                _(u"Perşembe"), _(u"Cuma"), _(u"Cumartesi"), _(u"Pazar")]
         self.output['objects'] = [days]
 
         def etkinlik(de):
@@ -264,15 +278,19 @@ class ProgramOlustur(CrudView):
             :return: ders adi ve zamani
             """
             aralik = "{baslangic} - {bitis}".format(
-                                        baslangic=format_time(time(int(de.baslangic_saat), int(de.baslangic_dakika))),
-                                        bitis=format_time(time(int(de.bitis_saat), int(de.bitis_dakika))))
+                baslangic=format_time(time(int(de.baslangic_saat),
+                                           int(de.baslangic_dakika))),
+                bitis=format_time(time(int(de.bitis_saat),
+                                       int(de.bitis_dakika)))
+            )
 
             return "\n\n**%s**\n%s\n\n" % (aralik, de.ders.ad)
 
         data_list = []
         for day in days:
             data_list.append(
-                ''.join(["%s" % etkinlik(de) for de in data_etkinlik.filter(gun=days.index(day) + 1)]))
+                ''.join(
+                    ["%s" % etkinlik(d) for d in data_etkinlik.filter(gun=days.index(day) + 1)]))
 
         self.detay_goster(data_list, obj)
 
@@ -283,11 +301,13 @@ class ProgramOlustur(CrudView):
             obj = Room.objects.get(obj_key)
 
         else:
-            sinav_etkinligi = map(lambda s: SinavEtkinligi.objects.get(sube=s), Sube.objects.filter(
-                                                            okutman_id=obj_key, donem=Donem.guncel_donem(self.current)))
+            sinav_etkinligi = map(lambda s: SinavEtkinligi.objects.get(sube=s),
+                                  Sube.objects.filter(okutman_id=obj_key,
+                                                      donem=Donem.guncel_donem(self.current)))
             obj = Okutman.objects.get(obj_key)
 
-        days = [_(u"Pazartesi"), _(u"Salı"), _(u"Çarşamba"), _(u"Perşembe"), _(u"Cuma"), _(u"Cumartesi"), _(u"Pazar")]
+        days = [_(u"Pazartesi"), _(u"Salı"), _(u"Çarşamba"),
+                _(u"Perşembe"), _(u"Cuma"), _(u"Cumartesi"), _(u"Pazar")]
 
         self.output['objects'] = [days]
 
@@ -303,9 +323,9 @@ class ProgramOlustur(CrudView):
 
         data_list = []
         for i, day in enumerate(days):
-            data_list.append(
-                ''.join(["%s" % etkinlik(de) for de in filter(lambda d: d.tarih.isoweekday() == i + 1,
-                                                              sinav_etkinligi)]))
+            data_list.append(''.join(["%s" % etkinlik(e) for e in filter(
+                lambda d: d.tarih.isoweekday() == i + 1, sinav_etkinligi)
+                                      ]))
         self.detay_goster(data_list, obj)
 
     def detay_goster(self, data_list, obj):
@@ -316,7 +336,7 @@ class ProgramOlustur(CrudView):
             "actions": False,
         }
         self.output['objects'].append(item)
-        _json = JsonForm(title=obj.__unicode__() +_(u" Detaylı Zaman Tablosu"))
+        _json = JsonForm(title=obj.__unicode__() + _(u"Detaylı Zaman Tablosu"))
         _json.tamamla = fields.Button(_(u"Bitir"))
         if not self.current.task_data['sonuc'] == 1:
             _json.geri = fields.Button(_(u"Geri"), cmd='geri_coklu')
@@ -336,13 +356,15 @@ class ProgramOlustur(CrudView):
         self.current.output['msgbox'] = MESSAGE['kayit_var']
 
     def sinav_yayinla(self):
-        se = SinavEtkinligi.objects.filter(bolum=self.current.role.unit, donem=Donem.guncel_donem(self.current))
+        se = SinavEtkinligi.objects.filter(bolum=self.current.role.unit,
+                                           donem=Donem.guncel_donem(self.current))
         for s in se:
             s.published = True
             s.save()
 
     def ders_yayinla(self):
-        de = DersEtkinligi.objects.filter(bolum=self.current.role.unit, donem=Donem.guncel_donem(self.current))
+        de = DersEtkinligi.objects.filter(bolum=self.current.role.unit,
+                                          donem=Donem.guncel_donem(self.current))
         for d in de:
             d.published = True
             d.save()

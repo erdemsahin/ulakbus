@@ -15,7 +15,6 @@ from datetime import time
 
 
 class ZamanDilimiDuzenle(CrudView):
-
     def varsayilan_zaman_dilimleri(self):
         zaman_dilimleri = sorted(ZamanDilimleri.objects.filter(birim=self.current.role.unit),
                                  key=lambda zd: zd.gun_dilimi)
@@ -33,7 +32,8 @@ class ZamanDilimiDuzenle(CrudView):
                 'type': "table-multiRow",
                 'fields': data_list,
                 'actions': [
-                    {'name': _(u'Değiştir'), 'cmd': 'degistir', 'show_as': 'button', 'object_key':'zaman_dilimi'}
+                    {'name': _(u'Değiştir'), 'cmd': 'degistir',
+                     'show_as': 'button', 'object_key': 'zaman_dilimi'}
                 ],
                 'key': data.key}
             self.output['objects'].append(item)
@@ -46,11 +46,15 @@ class ZamanDilimiDuzenle(CrudView):
         self.current.task_data['zaman_dilimi'] = self.current.input['zaman_dilimi']
         zd = ZamanDilimleri.objects.get(self.current.input['zaman_dilimi'])
         _json = JsonForm(title=_(u"ZAMAN DİLİMİ"))
-        _json.gun_dilimi = fields.String(title=_(u"GÜN DİLİMİ"), default=zd.get_gun_dilimi_display())
-        _json.baslangic_saat = fields.String(_(u"Başlangıç Saati"), default=zd.baslama_saat, required=False)
-        _json.baslangic_dakika = fields.String(_(u"Başlangıç Dakikası"), default=zd.baslama_dakika, required=False)
+        _json.gun_dilimi = fields.String(title=_(u"GÜN DİLİMİ"),
+                                         default=zd.get_gun_dilimi_display())
+        _json.baslangic_saat = fields.String(_(u"Başlangıç Saati"),
+                                             default=zd.baslama_saat, required=False)
+        _json.baslangic_dakika = fields.String(_(u"Başlangıç Dakikası"),
+                                               default=zd.baslama_dakika, required=False)
         _json.bitis_saat = fields.String(_(u"Bitiş Saati"), default=zd.bitis_saat, required=False)
-        _json.bitis_dakika = fields.String(_(u"Bitiş Dakikası"), default=zd.bitis_dakika, required=False)
+        _json.bitis_dakika = fields.String(_(u"Bitiş Dakikası"),
+                                           default=zd.bitis_dakika, required=False)
         _json.kaydet = fields.Button(_(u"Kaydet"), cmd='kayit')
         _json.tamamlandi = fields.Button(_(u'İptal'), cmd='vazgec')
         self.form_out(_json)

@@ -4,13 +4,15 @@
 # This file is licensed under the GNU General Public License v3
 # (GPLv3).  See LICENSE.txt for details.
 
-from datetime import datetime
-
 from ulakbus.models import Donem
 from zengine import forms
 from zengine.forms import fields
 from zengine.views.crud import CrudView
 from zengine.lib.translation import gettext as _, gettext_lazy, format_date
+
+SON_DONEM_BILGILER = _(u"""Kayıtlardaki en son donem {donem}
+Başlangıç Tarihi: {baslangic},
+Bitiş Tarihi: {bitis}""")
 
 
 class DonemForm(forms.JsonForm):
@@ -19,11 +21,15 @@ class DonemForm(forms.JsonForm):
 
     """
 
-    guz_baslangic_tarihi = fields.Date(gettext_lazy(u"Başlangıç Tarihi"), format="%d.%m.%Y", required=True)
-    guz_bitis_tarihi = fields.Date(gettext_lazy(u"Bitiş Tarihi"), index=True, format="%d.%m.%Y", required=True)
-    bahar_baslangic_tarihi = fields.Date(gettext_lazy(u"Başlangıç Tarihi"), index=True, format="%d.%m.%Y",
+    guz_baslangic_tarihi = fields.Date(gettext_lazy(u"Başlangıç Tarihi"), format="%d.%m.%Y",
+                                       required=True)
+    guz_bitis_tarihi = fields.Date(gettext_lazy(u"Bitiş Tarihi"), index=True, format="%d.%m.%Y",
+                                   required=True)
+    bahar_baslangic_tarihi = fields.Date(gettext_lazy(u"Başlangıç Tarihi"), index=True,
+                                         format="%d.%m.%Y",
                                          required=True)
-    bahar_bitis_tarihi = fields.Date(gettext_lazy(u"Bitiş Tarihi"), index=True, format="%d.%m.%Y", required=True)
+    bahar_bitis_tarihi = fields.Date(gettext_lazy(u"Bitiş Tarihi"), index=True, format="%d.%m.%Y",
+                                     required=True)
 
     class Meta:
         grouping = [
@@ -90,12 +96,10 @@ class YeniDonemOlusturma(CrudView):
 
         son_donem = Donem.son_donem()
 
-        _form.help_text = _(u"""Kayıtlardaki en son donem {donem}
-        Başlangıç Tarihi: {baslangic},
-        Bitiş Tarihi: {bitis}
-        """).format(donem=son_donem.ad,
-                    baslangic=format_date(son_donem.baslangic_tarihi),
-                    bitis=format_date(son_donem.bitis_tarihi))
+        _form.help_text = SON_DONEM_BILGILER.format(donem=son_donem.ad,
+                                                    baslangic=format_date(
+                                                        son_donem.baslangic_tarihi),
+                                                    bitis=format_date(son_donem.bitis_tarihi))
 
         self.form_out(_form)
 

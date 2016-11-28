@@ -14,6 +14,13 @@ from ulakbus.lib.common import aktivasyon_kodu_uret
 from ulakbus.lib.common import ParolaSifirlama
 from ulakbus.lib.common import kullanici_adi_var_mi
 
+PAROLA_SIFIRLAMA_UYARISI = _(u"""Girdiğiniz kullanıcı adınıza kayıtlı birincil e-posta
+adresinize parola sıfırlama linki gönderilecektir.""")
+
+PAROLA_SIFIRLAMA_BILDIRIMI = _(u"""E-Posta adresinizi doğrulamak için aşağıdaki linke tıklayınız:
+
+%s/#/%s/dogrulama=%s""")
+
 
 class ParolamiUnuttum(UlakbusView):
     """
@@ -47,8 +54,7 @@ class ParolamiUnuttum(UlakbusView):
             self.mesaj_kutusu_goster(self.current.task_data.get('title', _(u"Hatalı Bilgi")))
 
         _form = JsonForm(current=self.current, title=_(u'Parola Sıfırlama'))
-        _form.help_text = _(u"""Girdiğiniz kullanıcı adınıza kayıtlı birincil e-posta
-                                adresinize parola sıfırlama linki gönderilecektir.""")
+        _form.help_text = PAROLA_SIFIRLAMA_UYARISI
         _form.kullanici_adi = fields.String(_(u"Kullanıcı adınızı giriniz:"))
         _form.ilerle = fields.Button(_(u"Parola Sıfırlama Linki Gönder"))
         self.form_out(_form)
@@ -81,8 +87,7 @@ class ParolamiUnuttum(UlakbusView):
         self.current.task_data["aktivasyon"] = aktivasyon_kodu_uret()
         ParolaSifirlama(self.current.task_data["aktivasyon"]).set(user.key, 7200)
 
-        self.current.task_data["message"] = "E-Posta adresinizi doğrulamak için aşağıdaki" \
-                                            " linke tıklayınız:\n\n %s/#/%s/dogrulama=%s" % (
+        self.current.task_data["message"] = PAROLA_SIFIRLAMA_BILDIRIMI % (
             DEMO_URL, self.current.task_data['wf_name'], self.current.task_data["aktivasyon"])
 
         self.current.task_data['subject'] = 'Ulakbüs Aktivasyon Maili'

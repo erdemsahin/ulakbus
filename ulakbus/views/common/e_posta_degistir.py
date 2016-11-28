@@ -14,6 +14,19 @@ from ulakbus.lib.common import EPostaDogrulama
 from ulakbus.lib.common import e_posta_uygunlugu
 from ulakbus.settings import DEMO_URL, MAIL_ADDRESS
 
+LINK_GONDERIMI_BILGILENDIR = _(u"""'%s' adresinize doğrulama linki gönderilmiştir.
+Lütfen e-posta'nızdaki bağlantı linkine tıklayarak e-posta adresinin
+size ait olduğunu doğrulayınız."""
+                               )
+
+DOGRULAMA_EPOSTA_MESAJI = _(u"""E-Posta adresinizi doğrulamak için aşağıdaki linke tıklayınız:
+
+
+%s/#/%s/dogrulama=%s""")
+
+BIRINCIL_EPOSTA_BILDIRIM = _(u"""Birincil olarak belirlemek istediğiniz e-posta adresinize
+doğrulama linki gönderilecektir.""")
+
 
 class EPostaForm(JsonForm):
     birincil_e_posta = fields.String(__(u"Birincil e-postanız"))
@@ -38,8 +51,7 @@ class EPostaDegistir(UlakbusView):
 
         self.current.task_data['deneme_sayisi'] = 3
         _form = EPostaForm(current=self.current, title=_(u'Yeni E-Posta Girişi'))
-        _form.help_text = _(u"""Birincil olarak belirlemek istediğiniz e-posta adresinize
-                          doğrulama linki gönderilecektir.""")
+        _form.help_text = BIRINCIL_EPOSTA_BILDIRIM
         _form.birincil_e_posta = self.current.user.e_mail
         _form.e_posta = fields.String(
             _(u"Birincil olarak belirlemek istediğiniz e-posta adresinizi yazınız."))
@@ -52,8 +64,8 @@ class EPostaDegistir(UlakbusView):
         """
         self.current.task_data["e_posta"] = self.input['form']['e_posta']
         self.current.task_data['uygunluk'] = e_posta_uygunlugu(self.current.task_data["e_posta"])
-        self.current.task_data['msg'] = _(u"""Girmiş olduğunuz e-posta adresi geçersizdir.
-                                        Lütfen düzelterek tekrar deneyiniz.""")
+        self.current.task_data['msg'] = _(
+            u"Girmiş olduğunuz e-posta adresi geçersizdir. Lütfen düzelterek tekrar deneyiniz.")
 
     def e_posta_bilgisi_cache_koy_e_posta_hazirla(self):
         """
@@ -65,9 +77,8 @@ class EPostaDegistir(UlakbusView):
         self.current.task_data["aktivasyon"] = aktivasyon_kodu_uret()
         EPostaDogrulama(self.current.task_data["aktivasyon"]).set(self.current.task_data["e_posta"],
                                                                   7200)
-        self.current.task_data["message"] = "E-Posta adresinizi doğrulamak için aşağıdaki linke" \
-                                            " tıklayınız:\n\n %s/#/%s/dogrulama=%s" % (
-        DEMO_URL, self.current.task_data['wf_name'], self.current.task_data["aktivasyon"])
+        self.current.task_data["message"] = DOGRULAMA_EPOSTA_MESAJI % (
+            DEMO_URL, self.current.task_data['wf_name'], self.current.task_data["aktivasyon"])
         self.current.task_data['subject'] = 'Ulakbüs Aktivasyon Maili'
 
     def aktivasyon_maili_yolla(self):
@@ -90,8 +101,7 @@ class EPostaDegistir(UlakbusView):
         Doğrulama linki yollandığında kullanıcı linkin yollandığına dair bilgilendirilir.
 
         """
-        self.current.task_data['msg'] = _(u"""'%s' adresinize doğrulama linki gönderilmiştir.
-        Lütfen e-posta'nızdaki bağlantı linkine tıklayarak e-posta adresinin size ait
-        olduğunu doğrulayınız. """) % (self.current.task_data['e_posta'])
+        self.current.task_data['msg'] = LINK_GONDERIMI_BILGILENDIR % self.current.task_data[
+            'e_posta']
 
         self.mesaj_kutusu_goster('E-Posta Doğrulama', 'info')

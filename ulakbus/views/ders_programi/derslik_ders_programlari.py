@@ -8,7 +8,6 @@
 # (GPLv3).  See LICENSE.txt for details.
 #
 from collections import OrderedDict
-
 from ulakbus.models import DersEtkinligi, Room, Donem
 from zengine.forms import JsonForm, fields
 from zengine.views.crud import CrudView
@@ -95,7 +94,7 @@ class DerslikDersProgrami(CrudView):
         ders_etkinlikleri = map_etkinlik_hafta_gunleri(
             d_etkinlikleri.order_by(
                 'gun', 'baslangic_saat',
-                'bitis_saat','baslangic_dakika', 'bitis_dakika'))
+                'bitis_saat', 'baslangic_dakika', 'bitis_dakika'))
         # Bir güne ait maximum etkinlik sayısı.
         max_etkinlik = max(map(len, ders_etkinlikleri.values()))
         for i in range(max_etkinlik):

@@ -20,8 +20,10 @@ from zengine.forms import fields
 from zengine.views.crud import CrudView
 from ulakbus.models.ogrenci import Donem, DonemDanisman, Okutman
 from ulakbus.models.auth import Unit, Role, AbstractRole
-from ulakbus.views.ders.ders import prepare_choices_for_model
 from zengine.lib.translation import gettext as _, gettext_lazy
+
+DANISMAN_KAYDEDILDI = _(
+    u'%(donem)s dönemi için %(program)s programına ait danışman listesi kaydedilmiştir')
 
 
 class DonemDanismanForm(forms.JsonForm):
@@ -85,8 +87,9 @@ class DonemDanismanAtama(CrudView):
         unit = self.current.role.unit
         self.current.task_data['unit_yoksis_no'] = unit.yoksis_no
         donem = Donem.guncel_donem(self.current)
-        okutmanlar = [o for o in Okutman.objects for gorev_birimi in o.GorevBirimi if
-                      gorev_birimi.yoksis_no == unit.yoksis_no and gorev_birimi.donem.key == donem.key]
+        okutmanlar = [o for o in Okutman.objects for gorev_birimi in o.GorevBirimi
+                      if gorev_birimi.yoksis_no == unit.yoksis_no
+                      and gorev_birimi.donem.key == donem.key]
         _form = DonemDanismanListForm(current=self, title=_(u"Okutman Seçiniz"))
         for okt in okutmanlar:
             try:
@@ -116,13 +119,12 @@ class DonemDanismanAtama(CrudView):
         with BlockSave(DonemDanisman):
             for danisman in danismanlar:
                 if danisman['secim']:
-                    key = danisman['key']
-                    okutman = Okutman.objects.get(key)
+                    okutman = Okutman.objects.get(danisman['key'])
                     donem_danisman, is_new = DonemDanisman.objects.get_or_create(okutman=okutman,
                                                                                  donem=donem,
                                                                                  bolum=unit)
                     if is_new:
-                        user = okutman.personel.user if okutman.personel.user else okutman.harici_okutman.user
+                        user = okutman.get_user()
                         abstract_role = AbstractRole.objects.get("DANISMAN")
                         unit = Unit.objects.get(yoksis_no=self.current.task_data['unit_yoksis_no'])
                         role = Role(user=user, unit=unit, abstract_role=abstract_role)
@@ -143,15 +145,15 @@ class DonemDanismanAtama(CrudView):
 
         self.current.output['msgbox'] = {
             'type': 'info', "title": _(u'Danismanlar Kaydedildi'),
-            "msg": _(
-                u'%(donem)s dönemi için %(donem)s programına ait danışman listesi kaydedilmiştir') % {
-                       'donem': donem, 'unit': unit}}
+            "msg": DANISMAN_KAYDEDILDI % {'donem': donem, 'program': unit}
+        }
 
         title = _(u"Danışman Atama")
         message = _(u"%s dönemi için  danışman olarak atandınız.") % donem
+
         for okutman_key in self.current.task_data['okutmanlar']:
             okutman = Okutman.objects.get(okutman_key)
-            user = okutman.personel.user if okutman.personel else okutman.harici_okutman.user
+            user = okutman.get_user()
             abstract_role = AbstractRole.objects.get("OGRETIM_ELEMANI")
             try:
                 role = Role.objects.get(user=user, abstract_role=abstract_role, unit=unit)

@@ -7,62 +7,63 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-11-23 16:47+0300\n"
-"PO-Revision-Date: 2016-09-01 13:35+0300\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2016-11-24 10:27+0000\n"
+"PO-Revision-Date: 2016-11-25 10:40+0300\n"
+"Last-Translator: Ali Riza Keles <ali.r.keles@gmail.com>\n"
 "Language: tr\n"
 "Language-Team: tr <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
+"X-Generator: Poedit 1.5.7\n"
 
 #: ../../zengine/zengine/management_commands.py:570
 msgid "Checking migration and solr ..."
-msgstr ""
+msgstr "“Checking migration and solr …”"
 
 #: ../../zengine/zengine/management_commands.py:575
 msgid "{0}Error not connected, open redis and rabbitmq{1}"
-msgstr ""
+msgstr "{0}Error not connected, open redis and rabbitmq{1}"
 
 #: ../../zengine/zengine/management_commands.py:591
 msgid "{0}Redis is not working{1} "
-msgstr ""
+msgstr "{0}Redis is not working{1} "
 
 #: ../../zengine/zengine/management_commands.py:605
 msgid "{0}Riak is working{1}"
-msgstr ""
+msgstr "{0}Riak is working{1}"
 
 #: ../../zengine/zengine/management_commands.py:607
 #: ../../zengine/zengine/management_commands.py:609
 msgid "{0}Riak is not working{1}"
-msgstr ""
+msgstr "{0}Riak is not working{1}"
 
 #: ../../zengine/zengine/management_commands.py:625
 msgid "{0}RabbitMQ is working{1}"
-msgstr ""
+msgstr "{0}RabbitMQ is working{1}"
 
 #: ../../zengine/zengine/management_commands.py:627
 #: ../../zengine/zengine/management_commands.py:629
 msgid "{0}RabbitMQ is not working!{1}"
-msgstr ""
+msgstr "{0}RabbitMQ is not working!{1}"
 
 #: ../../zengine/zengine/management_commands.py:631
 msgid "{0}RabbitMQ username and password wrong{1}"
-msgstr ""
+msgstr "{0}RabbitMQ username and password wrong{1}"
 
 #: ../../zengine/zengine/management_commands.py:643
 msgid "{0}File system encoding correct{1}"
-msgstr ""
+msgstr "{0}File system encoding correct{1}"
 
 #: ../../zengine/zengine/management_commands.py:646
 msgid "{0}File system encoding wrong!!{1}"
-msgstr ""
+msgstr "{0}File system encoding wrong!!{1}"
 
 #: ../../zengine/zengine/management_commands.py:655
 msgid "{0}{1} : {2}{3}"
-msgstr ""
+msgstr "{0}{1} : {2}{3}"
 
 #: ../../zengine/zengine/models/auth.py:24
 #: ../../zengine/zengine/models/auth.py:59
@@ -125,15 +126,15 @@ msgstr "Tercih Edilen Sayı Formatı"
 
 #: ../../zengine/zengine/models/auth.py:99
 msgid "Last Login Role Key"
-msgstr ""
+msgstr "Last Login Role Key"
 
 #: ../../zengine/zengine/models/auth.py:105
 msgid "User"
-msgstr ""
+msgstr "Kullanıcı"
 
 #: ../../zengine/zengine/models/auth.py:106
 msgid "Users"
-msgstr ""
+msgstr "Kullanıcılar"
 
 #: ../../zengine/zengine/models/auth.py:145
 msgid "Archived"
@@ -161,69 +162,69 @@ msgstr "İzinleri Düzenle"
 
 #: ../../zengine/zengine/models/workflow_manager.py:192
 msgid "None"
-msgstr ""
+msgstr "None"
 
 #: ../../zengine/zengine/models/workflow_manager.py:193
 msgid "15 day before, once in 3 days"
-msgstr ""
+msgstr "15 gün önce, 3 günde 1 kez"
 
 #: ../../zengine/zengine/models/workflow_manager.py:194
 msgid "1 week before, daily"
-msgstr ""
+msgstr "Bir hafta önce, günlük"
 
 #: ../../zengine/zengine/models/workflow_manager.py:195
 msgid "Day before start time"
-msgstr ""
+msgstr "Başlangıç zamanından önceki gün"
 
 #: ../../zengine/zengine/models/workflow_manager.py:199
 msgid "Selected unit"
-msgstr ""
+msgstr "Seçili Birim"
 
 #: ../../zengine/zengine/models/workflow_manager.py:200
 msgid "Selected unit and all sub-units of it"
-msgstr ""
+msgstr "Alt birimleri ile birlikte seçili birim"
 
 #: ../../zengine/zengine/models/workflow_manager.py:238
 msgid "Name of task"
-msgstr ""
+msgstr "Task adı"
 
 #: ../../zengine/zengine/models/workflow_manager.py:242
 msgid "Get roles from"
-msgstr ""
+msgstr "Rolleri getir"
 
 #: ../../zengine/zengine/models/workflow_manager.py:243
 msgid "Role query dict"
-msgstr ""
+msgstr "Rol sorgu sözlüğü"
 
 #: ../../zengine/zengine/models/workflow_manager.py:244
 msgid "Object query dict"
-msgstr ""
+msgstr "Nesne sorgu sözlüğü"
 
 #: ../../zengine/zengine/models/workflow_manager.py:245
 #: ../../zengine/zengine/models/workflow_manager.py:549
 msgid "Subject ID"
-msgstr ""
+msgstr "Özne ID"
 
 #: ../../zengine/zengine/models/workflow_manager.py:246
 #: ../../zengine/zengine/models/workflow_manager.py:552
 msgid "Object type"
-msgstr ""
+msgstr "Nesne Tipi"
 
 #: ../../zengine/zengine/models/workflow_manager.py:247
 msgid "Start time"
-msgstr ""
+msgstr "Başlangıç Zamanı"
 
 #: ../../zengine/zengine/models/workflow_manager.py:248
 msgid "Finish time"
-msgstr ""
+msgstr "Bitiş Zamanı"
 
 #: ../../zengine/zengine/models/workflow_manager.py:249
 msgid "Repeating period"
-msgstr ""
+msgstr "Tekrar periyodu"
 
 #: ../../zengine/zengine/models/workflow_manager.py:250
 msgid "Notification density"
-msgstr ""
+msgstr "Bildirim yoğunluğu"
 
 #: ../../zengine/zengine/views/crud.py:37
 msgid "Add"
@@ -259,29 +260,29 @@ msgstr "Düzenle"
 
 #: ../../zengine/zengine/views/role_switching.py:26
 msgid "Switch Role"
-msgstr ""
+msgstr "Role Değiştir"
 
 #: ../../zengine/zengine/views/role_switching.py:30
 msgid "Please, choose the role you want to switch:"
-msgstr ""
+msgstr "Lütfen değiştirmek istediğiniz rolü seçin:"
 
 #: ../../zengine/zengine/views/role_switching.py:33
 msgid "Switch"
-msgstr ""
+msgstr "Değiştir"
 
-#: ../../zengine/zengine/views/system.py:95
+#: ../../zengine/zengine/views/system.py:96
 msgid "Assign Someone Else"
 msgstr "Başkasına Ata"
 
-#: ../../zengine/zengine/views/system.py:96
+#: ../../zengine/zengine/views/system.py:97
 msgid "Suspend"
 msgstr "Askıya Al"
 
-#: ../../zengine/zengine/views/system.py:97
+#: ../../zengine/zengine/views/system.py:98
 msgid "Postpone"
 msgstr "Ertele"
 
-#: ../../zengine/zengine/views/system.py:99
+#: ../../zengine/zengine/views/system.py:100
 msgid "Assign Yourself"
 msgstr "Üzerime Al"
 
@@ -334,8 +335,7 @@ msgstr "İş akışı başarıyla başkasına atandı."
 
 #: ../../zengine/zengine/views/task_manager_actions.py:110
 msgid ""
-"This workflow does not belong to you, you cannot assign it to someone "
-"else."
+"This workflow does not belong to you, you cannot assign it to someone else."
 msgstr "Bu iş akışı size ait değil, başkasına atayamazsınız."
 
 #: ../../zengine/zengine/views/task_manager_actions.py:157
@@ -353,4 +353,3 @@ msgstr "İş akışından ayrıldın."
 #: ../../zengine/zengine/views/task_manager_actions.py:198
 msgid "Unfortunately, this workflow does not belong to you or is already idle."
 msgstr "Ne yazık ki, bu iş akışı size ait değil veya zaten boşta."
-

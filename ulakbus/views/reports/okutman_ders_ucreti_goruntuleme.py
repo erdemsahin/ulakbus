@@ -18,6 +18,15 @@ from collections import OrderedDict
 from ulakbus.lib.date_time_helper import AYLAR, ay_listele
 from ulakbus.views.reports import ders_ucreti_hesaplama as DU
 
+IZIN_ACIKLAMA = _(u"""
+R: Resmi Tatil
+İ: İzinli
+""")
+
+UYGUN_DONEM_BULUNAMADI = _(u"""Seçtiğiniz yıl ve aya ait dönem bulunamadı. Tarih
+seçimine geri dönmek için Geri Dön butonuna, işlemi
+iptal etmek için İptal butonuna basabilirsiniz.""")
+
 guncel_yil = datetime.now().year
 guncel_ay = datetime.now().month
 
@@ -83,7 +92,8 @@ class DersUcretiHesaplama(CrudView):
         self.current.task_data["ay_isim"] = AYLAR[self.input['form']['ay_sec'] - 1][1]
 
         takvim = calendar.monthrange(self.current.task_data["yil"], self.current.task_data["ay"])
-        donem_list = Donem.takvim_ayina_rastlayan_donemler(self.current.task_data["yil"], self.current.task_data["ay"], takvim)
+        donem_list = Donem.takvim_ayina_rastlayan_donemler(
+            self.current.task_data["yil"], self.current.task_data["ay"], takvim)
 
         if len(donem_list) > 0:
             self.current.task_data['donem_sayi'] = True
@@ -98,9 +108,7 @@ class DersUcretiHesaplama(CrudView):
         """
 
         _form = JsonForm(current=self.current, title=_(u"Dönem Bulunamadı"))
-        _form.help_text = _(u"""Seçtiğiniz yıl ve aya ait dönem bulunamadı. Tarih
-                          seçimine geri dönmek için Geri Dön butonuna, işlemi
-                          iptal etmek için İptal butonuna basabilirsiniz.""")
+        _form.help_text = UYGUN_DONEM_BULUNAMADI
         _form.geri_don = fields.Button(_(u"Geri Dön"), flow='tarih_sec')
         _form.iptal = fields.Button(_(u"İptal"))
         self.form_out(_form)
@@ -117,9 +125,9 @@ class DersUcretiHesaplama(CrudView):
         Ders Ücreti ya da Ek Ders Ücreti hesaplarından birini seçmeye yarar.
         """
 
-        _form = JsonForm(current=self.current, title=_(u"Öğretim Görevlileri "
-                                                       u"Puantaj Tablosu Hesaplama "
-                                                       u"Türü Seçiniz"))
+        form_title = _(u"Öğretim Görevlileri Puantaj Tablosu Hesaplama ")
+
+        _form = JsonForm(current=self.current, title=form_title)
 
         _form.ders = fields.Button(_(u"Ders Ücreti Hesapla"), cmd='ders_ucreti_hesapla')
         _form.ek_ders = fields.Button(_(u"Ek Ders Ücreti Hesapla"), cmd='ek_ders_ucreti_hesapla')
@@ -234,7 +242,5 @@ class DersUcretiHesaplama(CrudView):
         self.output['objects'].append(item)
 
         _form.pdf_sec = fields.Button(_(u"Pdf Çıkar"))
-        _form.help_text = _(u"""
-                         R: Resmi Tatil
-                         İ: İzinli""")
+        _form.help_text = IZIN_ACIKLAMA
         self.form_out(_form)

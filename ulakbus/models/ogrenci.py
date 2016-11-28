@@ -328,6 +328,14 @@ class Okutman(Model):
 
         return self.personel if self.personel.exist else self.harici_okutman
 
+    def get_user(self):
+        """
+        Okutmanın bağlı olduğu personel veya harici okutmana ait kullanıcıyı döndürür.
+        Returns:
+
+        """
+        return self.okutman.user
+
     def __unicode__(self):
         return gettext(u'%(ad)s %(soyad)s') % {'ad': self.ad, 'soyad': self.soyad}
 

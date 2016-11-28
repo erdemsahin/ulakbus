@@ -15,6 +15,10 @@ from zengine.lib.translation import gettext as _, gettext_lazy as __
 
 aktivasyon_kalibi = re.compile('dogrulama=[a-z0-9]{40}')
 
+DEVAM_MESAJ = _(u"""%s ya da çıkış yapmadan devam edebilirsiniz.
+
+Eğer eski bilgilerinizin bilindiği şüphesine sahipseniz 'Çıkış Yap' seçeneğini öneririz.""")
+
 
 class KullaniciForm(JsonForm):
     class Meta:
@@ -65,8 +69,9 @@ class ProfilGoruntule(UlakbusView):
         Bağlantı linki geçersiz olmuşsa, uyarı mesajı oluşturulur.
 
         """
-        self.current.task_data['msg'] = _(u"""E-Postanızı onaylamanız için
-            gönderilen link geçersiz olmuştur. Lütfen tekrar deneyiniz.""")
+        self.current.task_data['msg'] = _(
+            u"E-Postanızı onaylamanız için gönderilen link geçersiz olmuştur. "
+            u"Lütfen tekrar deneyiniz.")
         self.current.task_data['title'] = _(u'Geçersiz İşlem')
         self.current.task_data['type'] = 'warning'
 
@@ -84,7 +89,7 @@ class ProfilGoruntule(UlakbusView):
         EPostaDogrulama(self.current.task_data['kod']).delete()
         self.current.task_data['title'] = _(u'E-Posta Değişikliği')
         self.current.task_data['msg'] = _(
-            u'E-Posta değiştirme işleminiz başarıyla gerçekleştirilmiştir.')
+            u"E-Posta değiştirme işleminiz başarıyla gerçekleştirilmiştir.")
         self.current.task_data['type'] = 'info'
 
     def profil_sayfasi_goruntule(self):
@@ -95,7 +100,8 @@ class ProfilGoruntule(UlakbusView):
         """
 
         if self.current.task_data.get('msg', None):
-            self.mesaj_kutusu_goster(self.current.task_data['title'], self.current.task_data['type'])
+            self.mesaj_kutusu_goster(self.current.task_data['title'],
+                                     self.current.task_data['type'])
 
         u = User.objects.get(self.current.user_id)
         _form = KullaniciForm(u, current=self.current,
@@ -113,10 +119,7 @@ class ProfilGoruntule(UlakbusView):
         Çıkış yapması ya da çıkış yapmadan devam etmesi, bunu seçebileceği ekran gösterilir.
 
         """
-        self.current.task_data['msg'] = _(u"""%s ya da çıkış yapmadan devam edebilirsiniz.
-                            Eğer eski bilgilerinizin bilindiği şüphesine sahipseniz 'Çıkış Yap'
-                            seçeneğini seçmenizi öneririz.""") % self.current.task_data[
-            'islem_mesaji']
+        self.current.task_data['msg'] = DEVAM_MESAJ % self.current.task_data['islem_mesaji']
         self.mesaj_kutusu_goster('İşlem Bilgilendirme', 'info')
 
         _form = JsonForm(current=self.current, title=_(u"İşlem Seçeneği"))

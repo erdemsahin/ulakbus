@@ -11,6 +11,13 @@ from ulakbus.lib.common import parola_kontrolleri
 from ulakbus.models import User
 from ulakbus.lib.common import ParolaSifirlama
 from zengine.lib.translation import gettext as _
+from ulakbus.views.common.parola_degistir import PAROLA_UYARISI
+
+YENI_PAROLA_GIRIS_YAP = _("""Yeni parolanızla giriş yapmak için
+giriş ekranına yönlendiriliyorsunuz.""")
+
+YENI_PAROLA_BELIRLE = _("""E-Posta adresiniz başarıyla doğrulanmıştır.
+Lütfen yeni parolanızı belirleyiniz.""")
 
 
 class YeniParolaBelirle(UlakbusView):
@@ -23,8 +30,7 @@ class YeniParolaBelirle(UlakbusView):
     def e_posta_dogrulama_mesaji_olustur(self):
 
         if self.current.task_data.get('msg', None):
-            self.current.task_data['msg'] = """E-Posta adresiniz başarıyla doğrulanmıştır.
-                                               Lütfen yeni parolanızı belirleyiniz."""
+            self.current.task_data['msg'] = YENI_PAROLA_BELIRLE
             self.current.task_data['title'] = 'E-Posta Adresi Doğrulama İşlemi'
             self.current.task_data['type'] = 'info'
 
@@ -40,14 +46,7 @@ class YeniParolaBelirle(UlakbusView):
                                      self.current.task_data['type'])
 
         _form = JsonForm(current=self.current, title=_(u'Yeni Parola Girişi'))
-        _form.help_text = _(
-            (u"Kendi güvenliğiniz ve sistem güvenliği için yeni oluşturacağınız parola:\n"
-             u"\n"
-             u"* Türkçe karakter içermemeli,\n"
-             u"* 8 karakterden büyük olmalı,\n"
-             u"* En az bir küçük harf, bir büyük harf, bir sayı ve bir özel karakter içermeli,\n"
-             u"* Özel karakterler = [\* & ^ % $ @ ! ? . : / > < ; ]\n"
-             u"* Örnek parola = Ulakbüs3\*\n"))
+        _form.help_text = PAROLA_UYARISI
         _form.yeni_parola = fields.String(_(u"Yeni parolanızı giriniz."), type="password")
         _form.yeni_parola_tekrar = fields.String(_(u"Yeni parolanızı tekrar giriniz."),
                                                  type="password")
@@ -95,5 +94,4 @@ class YeniParolaBelirle(UlakbusView):
         """
         self.current.task_data['show_logout_message'] = True
         self.current.task_data['logout_title'] = 'Parolanız Başarıyla Sıfırlandı'
-        self.current.task_data['logout_message'] = """Yeni parolanızla giriş yapmak için
-                                                    giriş ekranına yönlendiriliyorsunuz."""
+        self.current.task_data['logout_message'] = YENI_PAROLA_GIRIS_YAP

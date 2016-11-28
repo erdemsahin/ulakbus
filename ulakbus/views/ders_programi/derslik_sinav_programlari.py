@@ -23,7 +23,8 @@ class DerslikSecimFormu(JsonForm):
 
 class DerslikSinavProgramlari(CrudView):
     """ Derslik Sınav Programları
-    Derslik Sınav Programları iş akışı, seçilen dersliğe ait sınav programlarını gösterip kullanıcının
+    Derslik Sınav Programları iş akışı, seçilen dersliğe
+    ait sınav programlarını gösterip kullanıcının
     yazdırabilmesine olanak sağlar.
 
     İş akışı 4 adımdan oluşur.

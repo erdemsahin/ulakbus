@@ -10,6 +10,10 @@ from zengine.forms import fields
 from zengine.lib.translation import gettext as _
 from ulakbus.lib.common import kullanici_adi_kontrolleri
 
+KULLANICI_ADI_DEGISIKLIGI = _(u"""'%s' olan kullanıcı adınız '%s' olarak değiştirilmiştir.
+
+Çıkış yapıp yeni kullanıcı adınızla giriş yapabilirsiniz""")
+
 
 class KullaniciAdiDegistir(UlakbusView):
     """
@@ -72,7 +76,7 @@ class KullaniciAdiDegistir(UlakbusView):
         """
 
         self.current.task_data['deneme_sayisi'] -= 1
-        self.current.task_data['msg'] = _(u'Parolanızı yanlış girdiniz. Lütfen tekrar deneyiniz.')
+        self.current.task_data['msg'] = _(u"Parolanızı yanlış girdiniz. Lütfen tekrar deneyiniz.")
         self.current.task_data['gecerli_sifre'] = self.current.user.check_password(
             self.current.input['form']['parola'])
 
@@ -85,9 +89,9 @@ class KullaniciAdiDegistir(UlakbusView):
         """
 
         self.current.task_data['show_logout_message'] = True
-        self.current.task_data['logout_title'] = 'Hatalı Parola Girişi'
-        self.current.task_data['logout_message'] = """Parolanızı üst üste üç kez yanlış
-                                                girdiğiniz için çıkışa yönlendiriliyorsunuz."""
+        self.current.task_data['logout_title'] = _(u"Hatalı Parola Girişi")
+        self.current.task_data['logout_message'] = _(
+            u"Parolanızı üst üste üç kez yanlış girdiğiniz için çıkışa yönlendiriliyorsunuz.")
 
     def yeni_kullanici_adi_kaydet(self):
         """
@@ -99,8 +103,5 @@ class KullaniciAdiDegistir(UlakbusView):
 
         self.current.user.username = self.current.task_data['yeni_k_adi']
         self.current.user.save()
-        self.current.task_data['islem_mesaji'] = _(u"""'%s' olan kullanıcı adınız
-                                                 '%s' olarak değiştirilmiştir.Çıkış yapıp yeni kullanıcı
-                                                 adınızla giriş yapabilirsiniz """) \
-                                                 % (self.current.task_data['eski_k_adi'],
-                                                    self.current.task_data['yeni_k_adi'])
+        self.current.task_data['islem_mesaji'] = KULLANICI_ADI_DEGISIKLIGI % (
+            self.current.task_data['eski_k_adi'], self.current.task_data['yeni_k_adi'])

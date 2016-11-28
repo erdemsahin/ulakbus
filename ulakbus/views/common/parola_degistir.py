@@ -10,6 +10,18 @@ from zengine.forms import fields
 from zengine.lib.translation import gettext as _
 from ulakbus.lib.common import parola_kontrolleri
 
+PAROLA_UYARISI = _(u"""Kendi güvenliğiniz ve sistem güvenliği için yeni oluşturacağınız parola:
+
+* Türkçe karakter içermemeli,
+* 8 karakterden büyük olmalı,
+* En az bir küçük harf, bir büyük harf, bir sayı ve bir özel karakter içermeli,
+* Eski şifrenizle aynı olmamalıdır,
+* Özel karakterler = [\* & ^ % $ @ ! ? . : / > < ; ],
+* Örnek parola = Ulakbüs3\*)""")
+
+YENI_PAROLA_MESAJ = _(u"""Parolanız başarıyla değiştirildi.
+Çıkış yapıp yeni parolanızla giriş yapabilirsiniz""")
+
 
 class ParolaDegistir(UlakbusView):
     """
@@ -27,15 +39,7 @@ class ParolaDegistir(UlakbusView):
             self.mesaj_kutusu_goster(_(u'Parola Hatalı'))
 
         _form = JsonForm(current=self.current, title=_(u'Parola Değiştirme'))
-        _form.help_text = _(
-            (u"Kendi güvenliğiniz ve sistem güvenliği için yeni oluşturacağınız parola:\n"
-             u"\n"
-             u"* Türkçe karakter içermemeli,\n"
-             u"* 8 karakterden büyük olmalı,\n"
-             u"* En az bir küçük harf, bir büyük harf, bir sayı ve bir özel karakter içermeli,\n"
-             u"* Eski şifrenizle aynı olmamalıdır.\n"
-             u"* Özel karakterler = [\* & ^ % $ @ ! ? . : / > < ; ]\n"
-             u"* Örnek parola = Ulakbüs3\*\n"))
+        _form.help_text = PAROLA_UYARISI
 
         _form.eski_parola = fields.String(_(u"Şu an kullandığınız parolanızı giriniz."),
                                           type="password")
@@ -74,5 +78,4 @@ class ParolaDegistir(UlakbusView):
         self.current.user.save()
         self.current.task_data['islem'] = True
         self.current.task_data['msg'] = None
-        self.current.task_data['islem_mesaji'] = _(u"""Parolanız başarıyla değiştirildi. Çıkış
-                                                    yapıp yeni parolanızla giriş yapabilirsiniz""")
+        self.current.task_data['islem_mesaji'] = YENI_PAROLA_MESAJ
