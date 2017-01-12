@@ -102,7 +102,9 @@ class WorkflowManagement(CrudView):
 
     def wf_zamanla(self):
         self.current.task_data['wf_name'] = self.input['form']['workflow']
-        workflow = BPMNWorkflow.objects.get(name=self.current.task_data['wf_name'])
+        workflow = BPMNWorkflow.objects.or_filter(name__contains=self.current.task_data['wf_name'],
+                                                  key__contains=self.current.task_data['wf_name'])[0]
+
         include_fields = 'form_include_%s' % workflow.task_type
         help_text = 'help_text_%s' % workflow.task_type
         _form = FormTask(self.object, current=self.current)
