@@ -63,7 +63,7 @@ class TestCase(BaseTestCase):
                                    kurum_ici_gorev_baslama_tarihi=baslangic.strftime("%d.%m.%Y"),
                                    kurum_ici_gorev_bitis_tarihi=bitis.strftime("%d.%m.%Y"),
                                    birim_id=birim_id,
-                                   soyut_rol_id=soyut_rol_id,
+                                   soyut_rol=soyut_rol_id,
                                    aciklama="Test Öğrenci İşleri Daire Başkanlığı Görevlendirme",
                                    resmi_yazi_sayi="123123",
                                    resmi_yazi_tarih=resmi_yazi_tarih.strftime("%d.%m.%Y")))
@@ -76,7 +76,7 @@ class TestCase(BaseTestCase):
 
         assert gorevlendirme.kurum_ici_gorev_bitis_tarihi == bitis
 
-        assert gorevlendirme.birim.key == birim_id
+        assert gorevlendirme.birim_id == birim_id
 
     def test_kurum_ici_gorevlendirme_dekan(self):
         """
@@ -123,7 +123,7 @@ class TestCase(BaseTestCase):
             kurum_ici_gorev_baslama_tarihi=baslangic.strftime("%d.%m.%Y"),
             kurum_ici_gorev_bitis_tarihi=bitis.strftime("%d.%m.%Y"),
             birim_id=birim_id,
-            soyut_rol_id=soyut_rol_id,
+            soyut_rol=soyut_rol_id,
             aciklama="Dekan olarak görevlendirme",
             resmi_yazi_sayi="123123",
             resmi_yazi_tarih=resmi_yazi_tarih.strftime("%d.%m.%Y")
@@ -137,7 +137,7 @@ class TestCase(BaseTestCase):
 
         assert gorevlendirme.kurum_ici_gorev_bitis_tarihi == bitis
 
-        assert gorevlendirme.birim.key == birim_id
+        assert gorevlendirme.birim_id == birim_id
 
         self.client.post(cmd="hizmet_cetveli_giris", wf="gorevlendirme", form=dict(
             baslama_tarihi="23.03.2017",
@@ -192,7 +192,7 @@ class TestCase(BaseTestCase):
             yevmiye=False,
             yolluk=True,
             ulke=90,
-            soyut_rol_id=soyut_rol_id
+            soyut_rol=soyut_rol_id
         ))
 
         # İlgili wf adımında görevlendirme kaydının yapılıp yapılmadığının kontrolü
@@ -257,7 +257,7 @@ class TestCase(BaseTestCase):
             yevmiye=False,
             yolluk=True,
             ulke=90,
-            soyut_rol_id=soyut_rol_id
+            soyut_rol=soyut_rol_id
         ))
 
         # İlgili wf adımında görevlendirme kaydının yapılıp yapılmadığının kontrolü

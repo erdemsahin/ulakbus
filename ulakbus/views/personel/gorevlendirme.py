@@ -16,12 +16,15 @@
 """
 
 from zengine.forms import JsonForm
+from zengine import forms
 from zengine.forms import fields
 from zengine.views.crud import CrudView
 from ulakbus.models import Personel, HizmetKayitlari
+from ulakbus.models.auth import AbstractRole
 from ulakbus.models import KurumDisiGorevlendirmeBilgileri, KurumIciGorevlendirmeBilgileri
 from zengine.lib.translation import gettext_lazy as __
 from ulakbus.lib.role import AbsRole
+from pyoko import ListNode
 
 
 class GorevlendirmeTurSecForm(JsonForm):
@@ -51,7 +54,7 @@ class Gorevlendirme(CrudView):
 class KurumIciGorevlendirmeForm(JsonForm):
     class Meta:
         include = ["kurum_ici_gorev_baslama_tarihi", "kurum_ici_gorev_bitis_tarihi",
-                   "birim", "soyut_rol", "aciklama",
+                   "birim_id", "soyut_rol", "aciklama",
                    "resmi_yazi_sayi", "resmi_yazi_tarih"]
 
         title = __(u"Kurum İçi Görevlendirme")
@@ -77,12 +80,12 @@ class KurumIciGorevlendirme(CrudView):
             resmi_yazi_tarih=form_data["resmi_yazi_tarih"],
             birim_id=form_data["birim_id"],
             personel_id=self.current.task_data["personel_id"],
-            soyut_rol_id=form_data["soyut_rol_id"]
+            soyut_rol=form_data["soyut_rol"]
         )
 
         gorevlendirme.blocking_save()
 
-        self.current.task_data["hizmet_cetvel_giris"] = form_data["soyut_rol_id"] in [
+        self.current.task_data["hizmet_cetvel_giris"] = form_data["soyut_rol"] in [
             AbsRole.FAKULTE_DEKANI.name, AbsRole.REKTOR.name]
 
 
@@ -115,12 +118,12 @@ class KurumDisiGorevlendirme(CrudView):
             yevmiye=form_data["yevmiye"],
             yolluk=form_data["yolluk"],
             ulke=form_data["ulke"],
-            soyut_rol_id=form_data["soyut_rol_id"],
+            soyut_rol=form_data["soyut_rol"],
             personel_id=self.current.task_data["personel_id"]
         )
         gorevlendirme.blocking_save()
 
-        self.current.task_data["hizmet_cetvel_giris"] = form_data["soyut_rol_id"] in [
+        self.current.task_data["hizmet_cetvel_giris"] = form_data["soyut_rol"] in [
             AbsRole.FAKULTE_DEKANI.name, AbsRole.REKTOR.name]
 
 

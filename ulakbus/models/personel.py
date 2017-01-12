@@ -10,7 +10,7 @@ Bu modül Ulakbüs uygulaması için personel modelini ve  personel ile ilişkil
 """
 from .hitap.hitap_sebep import HitapSebep
 from pyoko.lib.utils import lazy_property
-
+from ulakbus.lib.view_helpers import prepare_choices_for_model
 from pyoko import Model, field
 from zengine.lib.translation import gettext_lazy as _, gettext
 from ulakbus.lib.personel import gorunen_kademe_hesapla
@@ -274,8 +274,8 @@ class KurumIciGorevlendirmeBilgileri(Model):
     gorev_tipi = field.String(_(u"Görev Tipi"), choices="gorev_tipi")
     kurum_ici_gorev_baslama_tarihi = field.Date(_(u"Başlama Tarihi"), format="%d.%m.%Y")
     kurum_ici_gorev_bitis_tarihi = field.Date(_(u"Bitiş Tarihi"), format="%d.%m.%Y")
-    birim = Unit()
-    soyut_rol = AbstractRole()
+    birim_id = field.String(title=_(u"Birim"), choices=prepare_choices_for_model(Unit))
+    soyut_rol = field.String(title=_(u"Ünvan"), choices=prepare_choices_for_model(AbstractRole))
     aciklama = field.String(_(u"Açıklama"))
     resmi_yazi_sayi = field.String(_(u"Resmi Yazı Sayı"))
     resmi_yazi_tarih = field.Date(_(u"Resmi Yazı Tarihi"), format="%d.%m.%Y")
@@ -343,7 +343,7 @@ class KurumDisiGorevlendirmeBilgileri(Model):
     yevmiye = field.Boolean(_(u"Yevmiye"), default=False)
     yolluk = field.Boolean(_(u"Yolluk"), default=False)
     ulke = field.Integer(_(u"Ülke"), default="90", choices="ulke")
-    soyut_rol = AbstractRole()
+    soyut_rol = field.String(title=_(u"Ünvan"), choices=prepare_choices_for_model(AbstractRole))
     personel = Personel()
 
     class Meta:
