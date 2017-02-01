@@ -86,3 +86,13 @@ class AkademikPerformans(Cache):
             self.set(cache_data, 8 * 60 * 60)
 
         return cache_data
+
+
+class ChoicesFromModel(Cache):
+    """
+
+    """
+    PREFIX = "CFM"
+
+    def __init__(self, key):
+        super(ChoicesFromModel, self).__init__(key, serialize=True)
